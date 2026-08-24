@@ -861,15 +861,30 @@ class AsyncMilvusClient(BaseMilvusClient):
     async def refresh_load(
         self,
         collection_name: str,
-        partition_names: Optional[List[str]] = None,
+        partition_names: Optional[Union[str, List[str]]] = None,
         timeout: Optional[float] = None,
         **kwargs,
     ):
+        if isinstance(partition_names, str):
+            partition_names = [partition_names]
+
+        kwargs.pop("_refresh", None)
         conn = await self._get_connection()
-        return await conn.refresh_load(
+        if partition_names:
+            await conn.load_partitions(
+                collection_name,
+                partition_names,
+                timeout=timeout,
+                _refresh=True,
+                context=self._generate_call_context(**kwargs),
+                **kwargs,
+            )
+            return
+
+        await conn.load_collection(
             collection_name,
-            partition_names,
             timeout=timeout,
+            _refresh=True,
             context=self._generate_call_context(**kwargs),
             **kwargs,
         )
