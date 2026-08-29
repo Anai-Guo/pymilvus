@@ -865,6 +865,23 @@ class AsyncMilvusClient(BaseMilvusClient):
         timeout: Optional[float] = None,
         **kwargs,
     ):
+        """Refresh the loaded data of a collection, or of specific partitions.
+
+        Mirrors MilvusClient.refresh_load: the load request is re-issued with
+        ``_refresh=True`` so that data inserted after the initial load becomes
+        searchable.
+
+        Args:
+            collection_name (str): The name of the collection.
+            partition_names (str | List[str], optional): A partition name, or a list of
+                partition names, to refresh. If omitted, the whole collection is
+                refreshed. Defaults to None.
+            timeout (float, optional): An optional duration of time in seconds to allow
+                for the RPC. Defaults to None.
+
+        Returns:
+            None: nothing is returned; a MilvusException is raised on failure.
+        """
         if isinstance(partition_names, str):
             partition_names = [partition_names]
 
