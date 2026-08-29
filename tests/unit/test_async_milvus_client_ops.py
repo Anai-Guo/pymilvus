@@ -122,7 +122,10 @@ class TestAsyncClientRefreshLoad:
     @pytest.mark.asyncio
     async def test_refresh_load_requests_a_refresh(self):
         client, handler = _make_client()
-        await client.refresh_load("col")
+        result = await client.refresh_load("col")
+        # The public contract is "returns nothing"; the old code leaked the handler
+        # return value, so pin it here.
+        assert result is None
         args, kwargs = handler.load_collection.call_args
         assert args[0] == "col"
         assert kwargs.get("_refresh") is True
@@ -130,7 +133,8 @@ class TestAsyncClientRefreshLoad:
     @pytest.mark.asyncio
     async def test_refresh_load_scopes_to_partitions(self):
         client, handler = _make_client()
-        await client.refresh_load("col", ["part1", "part2"])
+        result = await client.refresh_load("col", ["part1", "part2"])
+        assert result is None
         handler.load_collection.assert_not_called()
         args, kwargs = handler.load_partitions.call_args
         assert args[0] == "col"
